@@ -126,6 +126,34 @@ public class SerializerUtilsPrimitiveSerializationTests {
         };
     }
 
+    @Test(dataProvider = "nonFiniteIntegerValues", expectedExceptions = IllegalArgumentException.class)
+    public void testSerializeIntegerColumnRejectsNonFiniteValue(String type, Object value) throws IOException {
+        serializeSingleValue(type, value);
+    }
+
+    @DataProvider(name = "nonFiniteIntegerValues")
+    private Object[][] nonFiniteIntegerValues() {
+        return new Object[][] {
+                {"Int32", Double.NaN},
+                {"Int32", Double.POSITIVE_INFINITY},
+                {"Int32", Float.NEGATIVE_INFINITY},
+                {"Nullable(Int32)", Double.NaN},
+                {"Int64", Double.POSITIVE_INFINITY},
+                {"Int64", Float.NaN},
+                {"UInt32", Double.NaN},
+                {"UInt16", Double.NEGATIVE_INFINITY},
+        };
+    }
+
+    @Test
+    public void testSerializeIntegerColumnFromFiniteDouble() throws IOException {
+        RowBinaryWithNamesAndTypesFormatReader reader = serializeSingleValue("Int32", 42.9d);
+
+        reader.next();
+
+        Assert.assertEquals(reader.getInteger("value"), Integer.valueOf(42));
+    }
+
     @Test
     public void testSerializeBFloat16RoundTripAllValues() throws IOException {
         // Exhaustively round-trip every one of the 2^16 BFloat16 bit patterns. For pattern b the

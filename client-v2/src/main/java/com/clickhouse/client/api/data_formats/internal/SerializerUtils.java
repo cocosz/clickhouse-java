@@ -1053,10 +1053,18 @@ public class SerializerUtils {
         }
     }
 
+    private static void requireFinite(Number value, String target) {
+        if ((value instanceof Double && !Double.isFinite((Double) value))
+                || (value instanceof Float && !Float.isFinite((Float) value))) {
+            throw new IllegalArgumentException("Cannot convert " + value + " to " + target);
+        }
+    }
+
     public static Integer convertToInteger(Object value) {
         if (value instanceof Integer) {
             return (Integer) value;
         } else if (value instanceof Number) {
+            requireFinite((Number) value, "Integer");
             return ((Number) value).intValue();
         } else if (value instanceof String) {
             return Integer.parseInt((String) value);
@@ -1071,6 +1079,7 @@ public class SerializerUtils {
         if (value instanceof Long) {
             return (Long) value;
         } else if (value instanceof Number) {
+            requireFinite((Number) value, "Long");
             return ((Number) value).longValue();
         } else if (value instanceof String) {
             return Long.parseLong((String) value);
